@@ -1,42 +1,48 @@
-// Find all tables with the class "table-hover"
-const tables = document.querySelectorAll('table.table-hover');
+function enhanceTables() {
+  const tables = document.querySelectorAll('table.table-hover');
+  if (!tables.length) return;
 
-// Process each table found on the page
-tables.forEach(table => {
-  // Find the body of the table
-  const tbody = table.querySelector('tbody');
-  // If a table has no body, skip it
-  if (!tbody) return;
+  tables.forEach(table => {
+    if (table.dataset.enhanced === "true") return;
+    table.dataset.enhanced = "true";
 
-  // --- NEW: Count the number of rows in the table body ---
-  // We look for all 'tr' (table row) elements within the tbody
-  const rowCount = tbody.querySelectorAll('tr').length;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
 
-  // Collapse the table by default
-  tbody.classList.add('hidden');
+    const rowCount = tbody.querySelectorAll('tr').length;
+    tbody.classList.add('hidden');
 
-  // Create a text-based toggle element
-  const toggle = document.createElement('div');
-  // --- NEW: Update the text to include the row count ---
-  // The text now shows the row count in a subtle, grayed-out span
-  toggle.innerHTML = `▶ Show Table <span class="row-count">(${rowCount} rows)</span>`;
-  toggle.classList.add('table-toggle');
+    const toggle = document.createElement('div');
+    toggle.innerHTML = `▶ Show Table <span class="row-count">(${rowCount} rows)</span>`;
+    toggle.classList.add('table-toggle');
 
-  // Insert the toggle link right before the table
-  table.parentNode.insertBefore(toggle, table);
+    table.parentNode.insertBefore(toggle, table);
 
-  // Add a click event listener to the toggle link
-  toggle.addEventListener('click', () => {
-    // Toggle the 'hidden' class to show/hide the table body
-    tbody.classList.toggle('hidden');
-
-    // Update the text and icon based on the table's state
-    if (tbody.classList.contains('hidden')) {
-      // The text when the table is collapsed
-      toggle.innerHTML = `▶ Show Table <span class="row-count">(${rowCount} rows)</span>`;
-    } else {
-      // The text when the table is expanded
-      toggle.innerHTML = `▼ Hide Table <span class="row-count">(${rowCount} rows)</span>`;
-    }
+    toggle.addEventListener('click', () => {
+      tbody.classList.toggle('hidden');
+      toggle.innerHTML = tbody.classList.contains('hidden')
+      ? `▶ Show Table <span class="row-count">(${rowCount} rows)</span>`
+      : `▼ Hide Table <span class="row-count">(${rowCount} rows)</span>`;
+    });
   });
-});
+}
+
+function startObserver() {
+  if (!document.body) {
+    console.log("Body not ready, retrying...");
+    requestAnimationFrame(startObserver); // retry until <body> exists
+    return;
+  }
+
+  // Run once immediately
+  enhanceTables();
+
+  // Watch for dynamically added tables
+  const observer = new MutationObserver(enhanceTables);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  console.log("MutationObserver attached.");
+}
+
+// Kick it off
+startObserver();
