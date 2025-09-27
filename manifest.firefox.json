@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "ErpSense",
-  "version": "1.2",
+  "version": "1.3",
   "description": "Enhances the PSIT ERP experience.",
   "icons": {
     "16": "icons/icon16.png",
@@ -13,8 +13,12 @@
       "16": "icons/icon16.png"
     }
   },
+  "background": {
+    "scripts": ["background.js"]
+  },
   "permissions": [
-    "https://erp.psit.ac.in/*"
+    "https://erp.psit.ac.in/*",
+    "cookies"
   ],
   "content_scripts": [
     {
@@ -26,6 +30,11 @@
       "matches": ["*://erp.psit.ac.in/Student/Dashboard"],
       "js": ["content/dashboard.js"],
       "css": ["styles/dashboard.css"]
+    },
+    {
+      "matches": ["*://erp.psit.ac.in/Student/MyAttendanceDetail"],
+      "js": ["content/myattendancedetail.js"],
+      "css": ["styles/myattendancedetail.css"]
     }
   ]
 }
