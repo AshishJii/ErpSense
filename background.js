@@ -35,6 +35,8 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
           if (cells.length < 8) return;
 
           const numCells = cells.length;
+          const modal = cells[0].querySelector('.modal');
+          
           const request = {
             // Reverted to .textContent.trim() for robustness
             id: cells[0].querySelector('a')?.textContent.trim() || '',
@@ -45,10 +47,10 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
               hod: cells[numCells - 2].textContent.trim(),
               director: cells[numCells - 1].textContent.trim(),
             },
+            remark: modal?.querySelector('.modal-body p')?.textContent.trim() || '',
             periods: []
           };
 
-          const modal = cells[0].querySelector('.modal');
           if (modal) {
             const periodRows = modal.querySelectorAll('table tbody tr');
             periodRows.forEach((periodRow, index) => {

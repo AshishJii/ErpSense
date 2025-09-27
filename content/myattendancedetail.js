@@ -5,10 +5,11 @@ const createStatusCell = (text, color, tooltip) => {
   const cell = document.createElement('b');
   cell.textContent = text;
   cell.style.color = color;
-  cell.style.cursor = 'pointer';
-  cell.title = tooltip;
+  cell.classList.add('custom-tooltip');
+  cell.dataset.tooltip = tooltip;
   return cell;
 };
+
 
 // Request the processed OD data from the background script.
 browser.runtime.sendMessage({ action: "getODRequest" }, (response) => {
@@ -17,13 +18,13 @@ browser.runtime.sendMessage({ action: "getODRequest" }, (response) => {
 
     // Determines the status and level of a request.
     const getFinalStatus = (request) => {
-      const { status, periods } = request;
-      if (status.verify.includes('Rejected')) return { status: 'Rejected', level: 'Coordinator', periods };
-      if (status.hod.includes('Rejected')) return { status: 'Rejected', level: 'HOD', periods };
-      if (status.director.includes('Rejected')) return { status: 'Rejected', level: 'Director', periods };
-      if (status.verify.includes('Pending')) return { status: 'Pending', level: 'Coordinator', periods };
-      if (status.hod.includes('Pending')) return { status: 'Pending', level: 'HOD', periods };
-      if (status.director.includes('Pending')) return { status: 'Pending', level: 'Director', periods };
+      const { status, periods, remark } = request;
+      if (status.verify.includes('Rejected')) return { status: 'Rejected', level: 'Coordinator', periods, remark };
+      if (status.hod.includes('Rejected')) return { status: 'Rejected', level: 'HOD', periods, remark };
+      if (status.director.includes('Rejected')) return { status: 'Rejected', level: 'Director', periods, remark };
+      if (status.verify.includes('Pending')) return { status: 'Pending', level: 'Coordinator', periods, remark };
+      if (status.hod.includes('Pending')) return { status: 'Pending', level: 'HOD', periods, remark };
+      if (status.director.includes('Pending')) return { status: 'Pending', level: 'Director', periods, remark };
       return null;
     };
 
@@ -39,6 +40,7 @@ browser.runtime.sendMessage({ action: "getODRequest" }, (response) => {
           acc[date] = {
             status: request.status,
             level: request.level,
+            remark: request.remark,
             periods: []
           };
         }
@@ -83,8 +85,8 @@ browser.runtime.sendMessage({ action: "getODRequest" }, (response) => {
               else if (level === 'Director') color = '#003875';
             }
             
-            const fullStatus = `${status} at ${level}`;
-            const statusCell = createStatusCell(abbr, color, fullStatus);
+            // Use the remark for the tooltip.
+            const statusCell = createStatusCell(abbr, color, odDataForDate.remark);
             targetCell.appendChild(statusCell);
           }
         });

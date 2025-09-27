@@ -1,0 +1,27 @@
+.custom-tooltip {
+  position: relative; 
+}
+
+.custom-tooltip:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.custom-tooltip:not([data-tooltip=""]):hover::after {
+  content: attr(data-tooltip);
+  
+  /* Positioning */
+  position: absolute;
+  bottom: 110%; 
+  left: 50%;
+  transform: translateX(-50%);
+  
+  /* Styling */
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap; 
+  z-index: 10;
+}
