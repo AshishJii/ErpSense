@@ -15,7 +15,7 @@
     }
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background-firefox.js"]
   },
   "permissions": [
     "https://erp.psit.ac.in/*",

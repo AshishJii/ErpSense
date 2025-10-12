@@ -15,9 +15,10 @@
     }
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background-chrome.js"
   },
   "permissions": [
+    "offscreen",
     "cookies"
   ],
   "host_permissions": [
@@ -36,8 +37,12 @@
     },
     {
       "matches": ["*://erp.psit.ac.in/Student/MyAttendanceDetail"],
-      "js": ["content/myattendancedetail.js"],
+      "js": ["lib/browser-polyfill.min.js","content/myattendancedetail.js"],
       "css": ["styles/myattendancedetail.css"]
+    },
+    {
+      "matches": ["*://erp.psit.ac.in/Student/ODRequest"],
+      "js": ["content/odrequest.js"]
     }
   ]
 }
