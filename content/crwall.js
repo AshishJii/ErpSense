@@ -1,4 +1,4 @@
-function enhanceTables() {
+function handlePageMutations() {
   const tables = document.querySelectorAll('table.table-hover');
   if (!tables.length) return;
 
