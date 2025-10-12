@@ -10,7 +10,8 @@
   },
   "browser_action": {
     "default_icon": {
-      "16": "icons/icon16.png"
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
     }
   },
   "background": {
@@ -35,6 +36,10 @@
       "matches": ["*://erp.psit.ac.in/Student/MyAttendanceDetail"],
       "js": ["content/myattendancedetail.js"],
       "css": ["styles/myattendancedetail.css"]
+    },
+    {
+      "matches": ["*://erp.psit.ac.in/Student/ODRequest"],
+      "js": ["content/odrequest.js"]
     }
   ]
 }

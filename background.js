@@ -67,7 +67,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
           }
           allRequestsData.push(request);
         });
-        
         sendResponse({ success: true, data: allRequestsData });
       })
       .catch(error => {
