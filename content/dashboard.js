@@ -73,22 +73,24 @@ function handlePageMutations() {
     minifySidebarOnLoad();
 }
 
-//----mutation observer----
-function startObserver() {
-  if (!document.body) {
-    console.log("Body not ready, retrying...");
-    requestAnimationFrame(startObserver); // retry until <body> exists
+//-------initialize--------
+async function initialize() {
+  // check if extension is enabled
+  const result = await browser.storage.sync.get({ isExtensionEnabled: true });
+  if (!result.isExtensionEnabled) {
+    console.log("ErpSense is disabled.");
     return;
   }
-
-  handlePageMutations(); // Run once immediately
-
-  // Watch for dynamically added tables
+  // Retry until the <body> is available
+  if (!document.body) {
+    requestAnimationFrame(initialize);
+    return;
+  }
+  // Run once immediately
+  handlePageMutations();
+  // Observer to watch for dynamically added content
   const observer = new MutationObserver(handlePageMutations);
   observer.observe(document.body, { childList: true, subtree: true });
-
-  console.log("MutationObserver attached.");
 }
 
-// Kick it off
-startObserver();
+initialize();

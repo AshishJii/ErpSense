@@ -1,4 +1,4 @@
-function highlightRowFromHash() {
+function handlePageMutations() {
   if (window.location.hash && window.location.hash.startsWith('#highlight=')) {
     const idToHighlight = window.location.hash.split('=')[1];
     if (!idToHighlight) return;
@@ -30,20 +30,24 @@ function highlightRowFromHash() {
   }
 }
 
-function startObserver() {
-  if (!document.body) {
-    requestAnimationFrame(startObserver); // Retry until the <body> is available
+//-------initialize--------
+async function initialize() {
+  // check if extension is enabled
+  const result = await browser.storage.sync.get({ isExtensionEnabled: true });
+  if (!result.isExtensionEnabled) {
+    console.log("ErpSense is disabled.");
     return;
   }
-
-  // Run the highlighter once immediately for initial page content
-  highlightRowFromHash();
-
-  // Create an observer to watch for dynamically added content
-  const observer = new MutationObserver(highlightRowFromHash);
+  // Retry until the <body> is available
+  if (!document.body) {
+    requestAnimationFrame(initialize);
+    return;
+  }
+  // Run once immediately
+  handlePageMutations();
+  // Observer to watch for dynamically added content
+  const observer = new MutationObserver(handlePageMutations);
   observer.observe(document.body, { childList: true, subtree: true });
-
-  console.log("MutationObserver attached for row highlighting.");
 }
 
-startObserver();
+initialize();

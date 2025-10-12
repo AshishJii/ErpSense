@@ -97,3 +97,6 @@ browser.runtime.sendMessage({ action: "getODRequest" }).then((response) => {
     console.error("ERROR: Failed to get OD data from background script:", response.error);
   }
 });
+
+//-------initialize--------
+// No after load changes needed for this script

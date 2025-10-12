@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <img src="../icons/icon48.png" alt="ErpSense Logo" class="logo">
+    
+    <div class="control-row">
+      <span class="label-text">Enable ErpSense</span>
+      <label class="switch">
+        <input type="checkbox" id="extension-toggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div id="update-message" class="update-message">
+      Please reload the tab for changes to take effect.
+    </div>
+
+    <div class="footer">
+      &copy; 2025 ErpSense. All rights reserved.
+    </div>
+
+  </div>
+  <script src="lib/browser-polyfill.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
