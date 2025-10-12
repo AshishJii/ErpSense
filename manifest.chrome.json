@@ -12,14 +12,16 @@
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"
-    }
+    },
+    "default_popup": "popup/popup.html"
   },
   "background": {
     "service_worker": "background-chrome.js"
   },
   "permissions": [
     "offscreen",
-    "cookies"
+    "cookies",
+    "storage"
   ],
   "host_permissions": [
     "https://erp.psit.ac.in/*"
@@ -27,12 +29,12 @@
   "content_scripts": [
     {
       "matches": ["*://erp.psit.ac.in/CR/cr_wall/*"],
-      "js": ["content/crwall.js"],
+      "js": ["lib/browser-polyfill.min.js","content/crwall.js"],
       "css": ["styles/crwall.css"]
     },
     {
       "matches": ["*://erp.psit.ac.in/Student/Dashboard"],
-      "js": ["content/dashboard.js"],
+      "js": ["lib/browser-polyfill.min.js","content/dashboard.js"],
       "css": ["styles/dashboard.css"]
     },
     {
@@ -42,7 +44,7 @@
     },
     {
       "matches": ["*://erp.psit.ac.in/Student/ODRequest"],
-      "js": ["content/odrequest.js"]
+      "js": ["lib/browser-polyfill.min.js","content/odrequest.js"]
     }
   ]
 }
