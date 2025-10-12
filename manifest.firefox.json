@@ -12,6 +12,12 @@
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"
+    },
+    "default_popup": "popup/popup.html"
+  },
+  "applications": {
+    "gecko": {
+      "id": "{bc139cf1-f353-4388-9d2b-65f0994a41bd}"
     }
   },
   "background": {
@@ -19,7 +25,8 @@
   },
   "permissions": [
     "https://erp.psit.ac.in/*",
-    "cookies"
+    "cookies",
+    "storage"
   ],
   "content_scripts": [
     {
