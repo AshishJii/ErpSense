@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "ErpSense",
-  "version": "1.3",
+  "version": "1.5",
   "description": "Enhances the PSIT ERP experience.",
   "icons": {
     "16": "icons/icon16.png",
@@ -17,7 +17,7 @@
   },
   "applications": {
     "gecko": {
-      "id": "{bc139cf1-f353-4388-9d2b-65f0994a41bd}"
+      "id": "{5c5ed6db-ca57-4f05-aa95-3a4e00edf1c7}"
     }
   },
   "background": {
