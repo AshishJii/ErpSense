@@ -47,6 +47,10 @@
     {
       "matches": ["*://erp.psit.ac.in/Student/ODRequest"],
       "js": ["content/odrequest.js"]
+    },
+    {
+      "matches": ["*://erp.psit.ac.in/Student/PLAIRequest"],
+      "js": ["content/plairequest.js"]
     }
   ]
 }
