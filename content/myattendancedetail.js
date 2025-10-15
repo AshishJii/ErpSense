@@ -28,7 +28,7 @@ function createOAAButton(date) {
 
 async function handlePageMutations() {
 // Request the processed OD data from the background script.
-  browser.runtime.sendMessage({ action: "getODRequest" }).then((response) => {
+  return browser.runtime.sendMessage({ action: "getODRequest" }).then((response) => {
     if (response && response.success) {
       console.log("SUCCESS: Received parsed OD data:", response.data);
 
@@ -173,12 +173,8 @@ async function initialize() {
     return;
   }
   // Run once immediately
-  handlePageMutations();
+  await handlePageMutations();
   addApplyButtons();
-
-  // TODO: refactor for static and dynamic content separately
-  const observer = new MutationObserver(addApplyButtons);
-  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 initialize();
