@@ -1,6 +1,48 @@
-const OFFSCREEN_DOCUMENT_PATH = '/offscreen/offscreen.html';
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "getODRequest") {
+    processPageRequest(message.action, sender, sendResponse, 'https://erp.psit.ac.in/Student/ODRequest');
+    return true;
+  }
+  else if (message.action === "uploadProof") {
+    processPageRequest(message.action, sender, sendResponse, 'https://erp.psit.ac.in/Student/MediaManager');
+    return true;
+  }
+});
 
-async function parseInOffscreen(htmlText) {
+function processPageRequest(message, sender, sendResponse, url) {
+  const pageUrl = sender.tab.url;
+  chrome.cookies.get({
+    url: pageUrl,
+    name: 'ci_session'
+  }).then(cookie => {
+    if (!cookie) {
+      return sendResponse({ success: false, error: "Authentication cookie not found." });
+    }
+    const cookieHeader = `${cookie.name}=${cookie.value}`;
+
+    fetch(url, {
+      method: 'GET',
+      headers: { 'Cookie': cookieHeader }
+    })
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.text();
+    })
+    .then(htmlText => {
+      return parseInOffscreen(message, htmlText);
+    })
+    .then(result => {
+      sendResponse(result);
+    })
+    .catch(error => {
+      console.error('Fetch or Offscreen error:', error);
+      sendResponse({ success: false, error: error.toString() });
+    });
+  });
+}
+
+async function parseInOffscreen(action, htmlText) {
+  const OFFSCREEN_DOCUMENT_PATH = '/offscreen/offscreen.html';
   const existingContexts = await chrome.runtime.getContexts({
     contextTypes: ['OFFSCREEN_DOCUMENT']
   });
@@ -15,48 +57,10 @@ async function parseInOffscreen(htmlText) {
   });
 
   const result = await chrome.runtime.sendMessage({
-    action: 'parseODRequest',
+    action: action,
     htmlText: htmlText
   });
   
+  console.log("ErpSense: Parsed data in offscreen document.");
   return result;
 }
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
-  if (message.action === "getODRequest") {
-    const pageUrl = sender.tab.url;
-    const odRequestUrl = 'https://erp.psit.ac.in/Student/ODRequest';
-
-    chrome.cookies.get({
-      url: pageUrl,
-      name: 'PHPSESSID'
-    }).then(cookie => {
-      if (!cookie) {
-        return sendResponse({ success: false, error: "Authentication cookie not found." });
-      }
-      const cookieHeader = `${cookie.name}=${cookie.value}`;
-
-      fetch(odRequestUrl, {
-        method: 'GET',
-        headers: { 'Cookie': cookieHeader }
-      })
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.text();
-      })
-      .then(htmlText => {
-        return parseInOffscreen(htmlText);
-      })
-      .then(result => {
-        sendResponse(result);
-      })
-      .catch(error => {
-        console.error('Fetch or Offscreen error:', error);
-        sendResponse({ success: false, error: error.toString() });
-      });
-    });
-
-    return true;
-  }
-});
