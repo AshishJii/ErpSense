@@ -88,21 +88,23 @@ async function handlePageMutations() {
               targetCell.innerHTML = '';
 
               let abbr = '';
+              let tooltip = '';
               let color = '#000';
               const { status, level } = odDataForDate;
 
               // Use the full level name for the abbreviation.
               if (status === 'Rejected') {
                 abbr = `R:${level}`;
+                tooltip = `Rejected by ${level}. ${odDataForDate.remark}`;
                 color = '#000000';
               } else if (status === 'Pending') {
                 abbr = `P:${level}`;
+                tooltip = `Pending at ${level}`;
                 if (level === 'Coordinator') color = '#007bff';
                 else if (level === 'HOD') color = '#0056b3';
                 else if (level === 'Director') color = '#003875';
               }
-              
-              const statusCell = createStatusCell(abbr, color, odDataForDate.remark, odDataForDate.id);
+              const statusCell = createStatusCell(abbr, color, tooltip, odDataForDate.id);
               targetCell.appendChild(statusCell);
             }
           });
