@@ -17,8 +17,15 @@ function parseODRequestPage(htmlText) {
     
     const request = {
       id: cells[0].querySelector('a')?.textContent.trim() || '',
+      // for each row, there is nested table for periods. Thats why cells are counted from the end
       details: cells[numCells - 7].textContent.trim(),
       submittedAt: cells[numCells - 5].textContent.trim(),
+      // Extract faculty ID using regex
+      facultyID: (() => {
+        const raw = cells[numCells - 4].textContent || '';
+        const match = raw.match(/[a-z]{2}[0-9]{5}/i);
+        return match ? match[0] : null;
+      })(),
       status: {
         verify: cells[numCells - 3].textContent.trim(),
         hod: cells[numCells - 2].textContent.trim(),

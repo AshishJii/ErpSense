@@ -49,6 +49,10 @@
     {
       "matches": ["*://erp.psit.ac.in/Student/PLAIRequest"],
       "js": ["lib/browser-polyfill.min.js","content/plairequest.js"]
+    },
+    {
+      "matches": ["*://erp.psit.ac.in/Student/ODRequestProcess"],
+      "js": ["lib/browser-polyfill.min.js","content/odrequestprocess.js"]
     }
   ]
 }
