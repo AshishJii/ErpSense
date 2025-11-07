@@ -97,14 +97,14 @@ async function handlePageMutations() {
             let tooltip = '';
             let color = '#000';
             const { status, level } = odDataForDate;
+            let shortLevel = level === 'Coordinator' ? 'Coord' : (level === 'Director' ? 'Dir' : level);
 
-            // Use the full level name for the abbreviation.
             if (status === 'Rejected') {
-              abbr = `OAA:R:${level}`;
+              abbr = `OAA:R:${shortLevel}`;
               tooltip = `Other Activity Attendance : Rejected : ${level}. ${odDataForDate.remark}`;
               color = '#000000';
             } else if (status === 'Pending') {
-              abbr = `OAA:P:${level}`;
+              abbr = `OAA:P:${shortLevel}`;
               tooltip = `Other Activity Attendance : Pending : ${level}`;
               if (level === 'Coordinator') color = '#007bff';
               else if (level === 'HOD') color = '#0056b3';
@@ -183,14 +183,14 @@ async function handlePageMutations() {
             let tooltip = '';
             let color = '#000';
             const { status, level } = sarDataForDate;
+            let shortLevel = level === 'Coordinator' ? 'Coord' : (level === 'Director' ? 'Dir' : level);
 
-            // Use the full level name for the abbreviation.
             if (status === 'Rejected') {
-              abbr = `SAR:R:${level}`;
+              abbr = `SAR:R:${shortLevel}`;
               tooltip = `Student Attendance Request : Rejected : ${level}. ${sarDataForDate.remark}`;
               color = '#000000';
             } else if (status === 'Pending') {
-              abbr = `SAR:P:${level}`;
+              abbr = `SAR:P:${shortLevel}`;
               tooltip = `Student Attendance Request : Pending : ${level}`;
               if (level === 'Coordinator') color = '#d400ffff';
               else if (level === 'HOD') color = '#a400b3ff';

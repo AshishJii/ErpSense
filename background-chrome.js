@@ -8,12 +8,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   else if (message.action === "getSARRequest") {
-    processPageRequest(sender, sendResponse, 'https://erp.psit.ac.in/Student/StudentAttRequest');
+    processPageRequest(message.action, sender, sendResponse, 'https://erp.psit.ac.in/Student/StudentAttRequest');
     return true;
   }
 });
 
-function processPageRequest(message, sender, sendResponse, url) {
+function processPageRequest(action, sender, sendResponse, url) {
   const pageUrl = sender.tab.url;
   chrome.cookies.get({
     url: pageUrl,
@@ -33,7 +33,7 @@ function processPageRequest(message, sender, sendResponse, url) {
       return response.text();
     })
     .then(htmlText => {
-      return parseInOffscreen(message, htmlText);
+      return parseInOffscreen(action, htmlText);
     })
     .then(result => {
       sendResponse(result);
