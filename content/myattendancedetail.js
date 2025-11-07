@@ -1,12 +1,12 @@
 // Creates a styled cell with specific text, color, a tooltip, and an ID for linking.
-const createStatusCell = (text, color, tooltip, odId) => {
+const createStatusCell = (text, color, tooltip, href) => {
   const cell = document.createElement('b');
   cell.textContent = text;
   cell.style.color = color;
   cell.classList.add('custom-tooltip');
   cell.dataset.tooltip = tooltip;
   cell.addEventListener('click', () => {
-    window.location.href = `https://erp.psit.ac.in/Student/ODRequest#highlight=${odId}`;
+    window.location.href = href;
   });
   return cell;
 };
@@ -17,104 +17,194 @@ function createOAAButton(date) {
   button.textContent = 'Apply OAA';
   button.className = 'btn btn-success btn-sm attendance-btn';
   button.style.marginLeft = '8px';
-  
+
   button.addEventListener('click', (event) => {
-    event.stopPropagation(); 
+    event.stopPropagation();
     window.location.href = `https://erp.psit.ac.in/Student/PLAIRequest#highlight=${date}`;
   });
-  
+
   return button;
 }
 
 async function handlePageMutations() {
-// Request the processed OD data from the background script.
-  return browser.runtime.sendMessage({ action: "getODRequest" }).then((response) => {
-    if (response && response.success) {
-      console.log("SUCCESS: Received parsed OD data:", response.data);
+  // Request the processed OD data from the background script.
+  const requests = [
+    browser.runtime.sendMessage({ action: "getODRequest" }),
+    browser.runtime.sendMessage({ action: "getSARRequest" })
+  ];
 
-      // Determines the status and level of a request.
-      const getFinalStatus = (request) => {
-        const { id, status, periods, remark } = request;
-        if (status.verify.includes('Rejected')) return { id, status: 'Rejected', level: 'Coordinator', periods, remark };
-        if (status.hod.includes('Rejected')) return { id, status: 'Rejected', level: 'HOD', periods, remark };
-        if (status.director.includes('Rejected')) return { id, status: 'Rejected', level: 'Director', periods, remark };
-        if (status.verify.includes('Pending')) return { id, status: 'Pending', level: 'Coordinator', periods, remark };
-        if (status.hod.includes('Pending')) return { id, status: 'Pending', level: 'HOD', periods, remark };
-        if (status.director.includes('Pending')) return { id, status: 'Pending', level: 'Director', periods, remark };
-        return null;
-      };
+  const [odResponse, sarResponse] = await Promise.all(requests);
 
-      const pendingOrRejectedRequests = response.data
-        .map(getFinalStatus)
-        .filter(request => request !== null);
+  if (odResponse && odResponse.success) {
+    console.log("SUCCESS: Received parsed OD data:", odResponse.data);
 
-      // Groups all periods by their date for easy lookup.
-      const groupedByDate = pendingOrRejectedRequests.reduce((acc, request) => {
-        request.periods.forEach(period => {
-          const { date, lecture } = period;
-          if (!acc[date]) {
-            acc[date] = {
-              id: request.id,
-              status: request.status,
-              level: request.level,
-              remark: request.remark,
-              periods: []
-            };
-          }
-          acc[date].periods.push(lecture);
-        });
-        return acc;
-      }, {});
-      
-      // Finds the attendance table and updates it.
-      const attendanceTable = document.querySelector('#data-table-buttons tbody');
-      if (!attendanceTable) return;
+    // Determines the status and level of a request.
+    const getFinalStatus = (request) => {
+      const { id, status, periods, remark } = request;
+      if (status.verify.includes('Rejected')) return { id, status: 'Rejected', level: 'Coordinator', periods, remark };
+      if (status.hod.includes('Rejected')) return { id, status: 'Rejected', level: 'HOD', periods, remark };
+      if (status.director.includes('Rejected')) return { id, status: 'Rejected', level: 'Director', periods, remark };
+      if (status.verify.includes('Pending')) return { id, status: 'Pending', level: 'Coordinator', periods, remark };
+      if (status.hod.includes('Pending')) return { id, status: 'Pending', level: 'HOD', periods, remark };
+      if (status.director.includes('Pending')) return { id, status: 'Pending', level: 'Director', periods, remark };
+      return null;
+    };
 
-      const tableRows = attendanceTable.querySelectorAll('tr');
+    const pendingOrRejectedRequests = odResponse.data
+      .map(getFinalStatus)
+      .filter(request => request !== null);
 
-      tableRows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length < 2) return;
-        const dateOnPage = cells[1].textContent.trim();
-
-        if (groupedByDate[dateOnPage]) {
-          const odDataForDate = groupedByDate[dateOnPage];
-          
-          odDataForDate.periods.forEach(periodNumber => {
-            const periodIndex = parseInt(periodNumber) + 1;
-            
-            if (cells[periodIndex] && cells[periodIndex].textContent.includes('ABS')) {
-              const targetCell = cells[periodIndex];
-              targetCell.innerHTML = '';
-
-              let abbr = '';
-              let tooltip = '';
-              let color = '#000';
-              const { status, level } = odDataForDate;
-
-              // Use the full level name for the abbreviation.
-              if (status === 'Rejected') {
-                abbr = `R:${level}`;
-                tooltip = `Rejected by ${level}. ${odDataForDate.remark}`;
-                color = '#000000';
-              } else if (status === 'Pending') {
-                abbr = `P:${level}`;
-                tooltip = `Pending at ${level}`;
-                if (level === 'Coordinator') color = '#007bff';
-                else if (level === 'HOD') color = '#0056b3';
-                else if (level === 'Director') color = '#003875';
-              }
-              const statusCell = createStatusCell(abbr, color, tooltip, odDataForDate.id);
-              targetCell.appendChild(statusCell);
-            }
-          });
+    // Groups all periods by their date for easy lookup.
+    const groupedByDate = pendingOrRejectedRequests.reduce((acc, request) => {
+      request.periods.forEach(period => {
+        const { date, lecture } = period;
+        if (!acc[date]) {
+          acc[date] = {
+            id: request.id,
+            status: request.status,
+            level: request.level,
+            remark: request.remark,
+            periods: []
+          };
         }
+        acc[date].periods.push(lecture);
       });
+      return acc;
+    }, {});
 
-    } else {
-      console.error("ERROR: Failed to get OD data from background script:", response.error);
-    }
-  });
+    // Finds the attendance table and updates it.
+    const attendanceTable = document.querySelector('#data-table-buttons tbody');
+    if (!attendanceTable) return;
+
+    const tableRows = attendanceTable.querySelectorAll('tr');
+
+    tableRows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length < 2) return;
+      const dateOnPage = cells[1].textContent.trim();
+
+      if (groupedByDate[dateOnPage]) {
+        const odDataForDate = groupedByDate[dateOnPage];
+
+        odDataForDate.periods.forEach(periodNumber => {
+          const periodIndex = parseInt(periodNumber) + 1;
+
+          if (cells[periodIndex] && cells[periodIndex].textContent.includes('ABS')) {
+            const targetCell = cells[periodIndex];
+            targetCell.innerHTML = '';
+
+            let abbr = '';
+            let tooltip = '';
+            let color = '#000';
+            const { status, level } = odDataForDate;
+
+            // Use the full level name for the abbreviation.
+            if (status === 'Rejected') {
+              abbr = `OAA:R:${level}`;
+              tooltip = `Other Activity Attendance : Rejected : ${level}. ${odDataForDate.remark}`;
+              color = '#000000';
+            } else if (status === 'Pending') {
+              abbr = `OAA:P:${level}`;
+              tooltip = `Other Activity Attendance : Pending : ${level}`;
+              if (level === 'Coordinator') color = '#007bff';
+              else if (level === 'HOD') color = '#0056b3';
+              else if (level === 'Director') color = '#003875';
+            }
+            const statusCell = createStatusCell(abbr, color, tooltip, `https://erp.psit.ac.in/Student/ODRequest#highlight=${odDataForDate.id}`);
+            targetCell.appendChild(statusCell);
+          }
+        });
+      }
+    });
+
+  } else {
+    console.error("ERROR: Failed to get OD data from background script:", odResponse.error);
+  }
+
+  // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+  if (sarResponse && sarResponse.success) {
+    console.log("SUCCESS: Received parsed SAR data:", sarResponse.data);
+
+    // Determines the status and level of a request.
+    const getFinalStatus = (request) => {
+      const { id, status, periods, remark } = request;
+      if (status.coordinator.includes('Rejected')) return { id, status: 'Rejected', level: 'Coordinator', periods, remark };
+      if (status.hod.includes('Rejected')) return { id, status: 'Rejected', level: 'HOD', periods, remark };
+      if (status.coordinator.includes('Pending')) return { id, status: 'Pending', level: 'Coordinator', periods, remark };
+      if (status.hod.includes('Pending')) return { id, status: 'Pending', level: 'HOD', periods, remark };
+      return null;
+    };
+
+    const pendingOrRejectedRequests = sarResponse.data
+      .map(getFinalStatus)
+      .filter(request => request !== null);
+
+    // Groups all periods by their date for easy lookup.
+    const groupedByDate = pendingOrRejectedRequests.reduce((acc, request) => {
+      request.periods.forEach(period => {
+        const { date, lecture } = period;
+        if (!acc[date]) {
+          acc[date] = {
+            id: request.id,
+            status: request.status,
+            level: request.level,
+            remark: request.remark,
+            periods: []
+          };
+        }
+        acc[date].periods.push(lecture);
+      });
+      return acc;
+    }, {});
+
+    // Finds the attendance table and updates it.
+    const attendanceTable = document.querySelector('#data-table-buttons tbody');
+    if (!attendanceTable) return;
+
+    const tableRows = attendanceTable.querySelectorAll('tr');
+
+    tableRows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length < 2) return;
+      const dateOnPage = cells[1].textContent.trim();
+
+      if (groupedByDate[dateOnPage]) {
+        const sarDataForDate = groupedByDate[dateOnPage];
+
+        sarDataForDate.periods.forEach(periodNumber => {
+          const periodIndex = parseInt(periodNumber) + 1;
+
+          if (cells[periodIndex] && cells[periodIndex].textContent.includes('ABS')) {
+            const targetCell = cells[periodIndex];
+            targetCell.innerHTML = '';
+
+            let abbr = '';
+            let tooltip = '';
+            let color = '#000';
+            const { status, level } = sarDataForDate;
+
+            // Use the full level name for the abbreviation.
+            if (status === 'Rejected') {
+              abbr = `SAR:R:${level}`;
+              tooltip = `Student Attendance Request : Rejected : ${level}. ${sarDataForDate.remark}`;
+              color = '#000000';
+            } else if (status === 'Pending') {
+              abbr = `SAR:P:${level}`;
+              tooltip = `Student Attendance Request : Pending : ${level}`;
+              if (level === 'Coordinator') color = '#d400ffff';
+              else if (level === 'HOD') color = '#a400b3ff';
+            }
+            const statusCell = createStatusCell(abbr, color, tooltip, `https://erp.psit.ac.in/Student/StudentAttRequest#highlight=${sarDataForDate.id}`);
+            targetCell.appendChild(statusCell);
+          }
+        });
+      }
+    });
+
+  } else {
+    console.error("ERROR: Failed to get SAR data from background script:", sarResponse.error);
+  }
 }
 
 function addApplyButtons() {
@@ -140,7 +230,7 @@ function addApplyButtons() {
   const dayBefore = new Date();
   dayBefore.setDate(today.getDate() - 2);
   const targetDates = new Set([formatDate(today), formatDate(yesterday), formatDate(dayBefore)]);
-  
+
   console.log("Searching for dates:", Array.from(targetDates));
 
   // Loop through each row of the table ONCE
@@ -154,7 +244,7 @@ function addApplyButtons() {
       const rowHasABS = Array.from(row.cells).some(cell => cell.textContent.trim() === 'ABS');
       if (rowHasABS) {
         console.log(`Found matching row for ${rowDateString} with ABS, adding button.`);
-        const button = createOAAButton(rowDateString);       
+        const button = createOAAButton(rowDateString);
         dateCell.appendChild(button);
       }
     }

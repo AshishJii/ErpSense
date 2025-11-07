@@ -55,6 +55,10 @@
     {
       "matches": ["*://erp.psit.ac.in/Student/ODRequestProcess"],
       "js": ["content/odrequestprocess.js"]
+    },
+    {
+      "matches": ["*://erp.psit.ac.in/Student/StudentAttRequest"],
+      "js": ["content/studentAttRequest.js"]
     }
   ]
 }

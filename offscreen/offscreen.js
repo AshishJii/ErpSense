@@ -73,6 +73,55 @@ function parseMediaManagerPage(htmlText) {
   return { success: true, data: dataForFrontend };
 }
 
+function parseSARRequestPage(htmlText) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText, 'text/html');
+  const tableBody = doc.querySelector('#data-table-buttons > tbody');
+  if (!tableBody) throw new Error("Could not find data table #data-table-buttons > tbody");
+
+  const rows = tableBody.querySelectorAll('tr');
+  const allRequestsData = [];
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 11) return;
+
+    const numCells = cells.length;
+    const modal = cells[0].querySelector('.modal');
+    
+    const request = {
+      id: cells[0].querySelector('a')?.textContent.trim() || '',
+      // for each row, there is nested table for periods. Thats why cells are counted from the end
+      details: cells[numCells - 7].textContent.trim(),
+      submittedAt: cells[numCells - 3].textContent.trim(),
+      status: {
+        coordinator: cells[numCells - 2].textContent.trim(),
+        hod: cells[numCells - 1].textContent.trim(),
+      },
+      remark: modal?.querySelector('.modal-body p')?.textContent.trim() || '',
+      periods: []
+    };
+
+    if (modal) {
+      const periodRows = modal.querySelectorAll('table tbody tr');
+      periodRows.forEach((periodRow, index) => {
+        if (index === 0) return;
+        const periodCells = periodRow.querySelectorAll('td');
+        if (periodCells.length === 3) {
+          request.periods.push({
+            date: periodCells[0].textContent.trim(),
+            lecture: periodCells[1].textContent.trim(),
+            status: periodCells[2].textContent.trim()
+          });
+        }
+      });
+    }
+    allRequestsData.push(request);
+  });
+  
+  return { success: true, data: allRequestsData };
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   let parserFunction;
 
@@ -81,7 +130,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } 
   else if (message.action === 'uploadProof') {
     parserFunction = parseMediaManagerPage;
-  } 
+  }
+  else if (message.action === 'getSARRequest') {
+    parserFunction = parseSARRequestPage;
+  }
   else return;
 
   try {

@@ -53,6 +53,10 @@
     {
       "matches": ["*://erp.psit.ac.in/Student/ODRequestProcess"],
       "js": ["lib/browser-polyfill.min.js","content/odrequestprocess.js"]
+    },
+    {
+      "matches": ["*://erp.psit.ac.in/Student/StudentAttRequest"],
+      "js": ["lib/browser-polyfill.min.js","content/studentAttRequest.js"]
     }
   ]
 }

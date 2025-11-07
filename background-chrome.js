@@ -7,6 +7,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     processPageRequest(message.action, sender, sendResponse, 'https://erp.psit.ac.in/Student/MediaManager');
     return true;
   }
+  else if (message.action === "getSARRequest") {
+    processPageRequest(sender, sendResponse, 'https://erp.psit.ac.in/Student/StudentAttRequest');
+    return true;
+  }
 });
 
 function processPageRequest(message, sender, sendResponse, url) {
