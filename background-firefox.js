@@ -11,6 +11,10 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     processPageRequest(sender, sendResponse, 'https://erp.psit.ac.in/Student/StudentAttRequest', parseSARRequestPage);
     return true;
   }
+  else if (message.action === "uploadSARProof") {
+    processPageRequest(sender, sendResponse, 'https://erp.psit.ac.in/Student/MediaManager', parseMediaManagerPage);
+    return true;
+  }
 });
 
 function processPageRequest(sender, sendResponse, url, parserFunction) {
