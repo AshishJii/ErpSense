@@ -23,7 +23,7 @@ ErpSense is an ongoing open-source project designed to transform the PSIT ERP in
 ## ✨ Features
 
 ### **Attendance Insights**
-View your pending OAA (On Academic Activities) and SAR (Student Activity Request) requests directly from your attendance page. No more navigating through multiple menus!
+View your pending OAA (Other Activity Attendance) and SAR (Student Attendance Request) requests directly from your attendance page. No more navigating through multiple menus!
 
 ### **Smart Tables**
 Expand and collapse CR wall tables with integrated search functionality for cleaner, more intuitive layouts. Find what you need, fast.
