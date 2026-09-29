@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "ErpSense - PSIT",
-  "version": "2.3",
+  "version": "2.5",
   "description": "Enhances the PSIT ERP with improved usability, shortcuts, and cleaner UI elements.",
   "icons": {
     "16": "icons/icon16.png",
@@ -28,7 +28,16 @@
     "cookies",
     "storage"
   ],
+  "web_accessible_resources": [
+    "icons/icon16.png"
+  ],
   "content_scripts": [
+    {
+      "matches": ["*://erp.psit.ac.in/*"],
+      "js": ["content/navbarWidget.js"],
+      "css": ["styles/navbarWidget.css"],
+      "run_at": "document_end"
+    },
     {
       "matches": ["*://erp.psit.ac.in/CR/cr_wall/*"],
       "js": ["content/crwall.js"],

@@ -1,5 +1,9 @@
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "getODRequest") {
+  if (message.action === 'reloadTab') {
+    browser.tabs.reload(sender.tab.id);
+    return; // no async response needed
+  }
+  else if (message.action === "getODRequest") {
     processPageRequest(sender, sendResponse, 'https://erp.psit.ac.in/Student/ODRequest', parseODRequestPage);
     return true;
   }
