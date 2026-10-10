@@ -40,31 +40,182 @@ function minifySidebarOnLoad() {
   }
 }
 
-function addTimeTableLink() {
-    const dashboardTop = document.querySelector('.sectionDashboardTop');
-    // Exit if the container doesn't exist OR if the link is already there
-    if (!dashboardTop || dashboardTop.querySelector('a[href="https://erp.psit.ac.in/Student/MyTimeTable"]')) {
+function createTimetableCard() {
+    const dashboard = document.querySelector('.sectionDashboardTop');
+
+    if (!dashboard) {
+        return null;
+    }
+
+    let card = dashboard.querySelector('[data-erpsense-timetable-card]');
+
+    if (card) {
+        return card;
+    }
+
+    card = document.createElement('div');
+    card.className = 'col-12 col-lg-8 mb-3';
+    card.dataset.erpsenseTimetableCard = 'true';
+
+    card.innerHTML = `
+        <a
+            href="https://erp.psit.ac.in/Student/MyTimeTable"
+            class="d-block text-decoration-none text-dark h-100"
+            aria-label="Today's Class — open full timetable"
+        >
+            <div class="btn1 btn-white w-100 h-100 p-3">
+                <h5 class="mb-3">Today's Class</h5>
+                <div data-erpsense-timetable-content>
+                    Loading today's timetable...
+                </div>
+                <div class="text-primary mt-2">
+                    View full timetable →
+                </div>
+            </div>
+        </a>
+    `;
+
+    dashboard.appendChild(card);
+
+    return card;
+}
+
+function renderTimetableMessage(card, message) {
+    const content = card?.querySelector('[data-erpsense-timetable-content]');
+
+    if (content) {
+        content.textContent = message;
+    }
+}
+
+async function addTimeTableLink() {
+    if (window.location.pathname !== '/Student/Dashboard') {
         return;
     }
 
-    const timeTableDiv = document.createElement('div');
-    timeTableDiv.className = 'col-sm-6 col-md-6 col-lg-4 col-xl-4 col-xxl-3 mb-3';
-    timeTableDiv.innerHTML = `
-        <a href="https://erp.psit.ac.in/Student/MyTimeTable" class="d-flex align-items-start text-decoration-none text-dark h-100">
-            <button type="button" class="btn1 btn-white w-100 align-items-stretch d-flex h-100">
-                <div class="icon icon-left icon-quarternary d-flex align-items-center justify-content-center">
-                    <i class="fa-solid fa-calendar-days text-primary"></i>
-                </div>
-                <div class="text text-end d-flex flex-column justify-content-center">
-                    <h4>My TimeTable</h4>
-                    <span class="text-dark" style="color: rgb(38, 50, 56);">View Class Schedule</span>
-                </div>
-            </button>
-        </a>
-    `;
-    
-    dashboardTop.appendChild(timeTableDiv);
-    console.log("TimeTable link successfully added to dashboard.");
+    const card = createTimetableCard();
+
+    if (!card || card.dataset.erpsenseTimetableLoading === 'true') {
+        return;
+    }
+
+    if (card.dataset.erpsenseTimetableUpdated === 'true') {
+        return;
+    }
+
+    card.dataset.erpsenseTimetableLoading = 'true';
+
+    try {
+        const response = await fetch(
+            'https://erp.psit.ac.in/Student/MyTimeTable',
+            {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store'
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Timetable request failed: ${response.status}`);
+        }
+
+        const html = await response.text();
+        const timetableDocument = new DOMParser().parseFromString(
+            html,
+            'text/html'
+        );
+
+        const sourceTable = timetableDocument.querySelector(
+            'table.table.table-striped.table-bordered'
+        );
+
+        if (!sourceTable) {
+            throw new Error('Could not find the timetable in the ERP response.');
+        }
+
+        const today = new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            timeZone: 'Asia/Kolkata'
+        }).format(new Date());
+
+        const todayRow = [...sourceTable.querySelectorAll('tbody tr')]
+            .find(row =>
+                row.querySelector('td')
+                    ?.textContent.trim().toLowerCase() === today.toLowerCase()
+            );
+
+        const content = card.querySelector(
+            '[data-erpsense-timetable-content]'
+        );
+
+        if (!content) {
+            throw new Error('Timetable card content is missing.');
+        }
+
+        if (!todayRow) {
+            renderTimetableMessage(card, `No timetable found for ${today}.`);
+            card.dataset.erpsenseTimetableUpdated = 'true';
+            return;
+        }
+
+        const sourceCells = [...todayRow.querySelectorAll('td')];
+
+        const periods = sourceCells.slice(1).map((cell, index) => {
+            const details = cell.querySelector('h5')?.innerText
+                .split('\n')
+                .map(line => line.trim())
+                .filter(Boolean) || [];
+
+            return {
+                period: index + 1,
+                details
+            };
+        });
+
+        const hasClasses = periods.some(period => period.details.length > 0);
+
+        content.replaceChildren();
+
+        if (!hasClasses) {
+            renderTimetableMessage(card, `No classes scheduled for ${today}.`);
+            card.dataset.erpsenseTimetableUpdated = 'true';
+            return;
+        }
+
+        const list = document.createElement('div');
+        list.className = 'd-flex flex-column gap-2';
+
+        periods.forEach(({ period, details }) => {
+            if (details.length === 0) {
+                return;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'border rounded p-2';
+
+            const heading = document.createElement('strong');
+            heading.textContent = `Period ${period}`;
+
+            const description = document.createElement('div');
+            description.textContent = details.join(' · ');
+
+            item.append(heading, description);
+            list.appendChild(item);
+        });
+
+        content.appendChild(list);
+        card.dataset.erpsenseTimetableUpdated = 'true';
+
+        console.log(`ErpSense: Today's timetable loaded for ${today}.`);
+    } catch (error) {
+        console.error('ErpSense timetable error:', error);
+        renderTimetableMessage(
+            card,
+            "Couldn't load today's timetable. Please refresh the page."
+        );
+    } finally {
+        delete card.dataset.erpsenseTimetableLoading;
+    }
 }
 
 function handlePageMutations() {
