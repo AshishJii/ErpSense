@@ -28,7 +28,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["icons/icon16.png"],
+      "resources": ["icons/icon128.png"],
       "matches": ["*://erp.psit.ac.in/*"]
     }
   ],

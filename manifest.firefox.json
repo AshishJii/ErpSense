@@ -29,7 +29,7 @@
     "storage"
   ],
   "web_accessible_resources": [
-    "icons/icon16.png"
+    "icons/icon128.png"
   ],
   "content_scripts": [
     {

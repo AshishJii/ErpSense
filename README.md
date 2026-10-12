@@ -49,7 +49,7 @@ Enjoy a clean, minimalist interface with unnecessary features removed and a mini
 <td width="50%">
 
 ### Attendance Page with Pending Requests
-<img src="icons/showcase_1.png" alt="Attendance Overview" width="100%">
+<img src="icons/showcase_2b.png" alt="Attendance Overview" width="100%">
 
 *View pending OAA and SAR requests directly from your attendance page with helpful tooltips*
 
@@ -57,7 +57,7 @@ Enjoy a clean, minimalist interface with unnecessary features removed and a mini
 <td width="50%">
 
 ### OAA Direct Upload & Auto-fill
-<img src="icons/showcase_2.png" alt="OAA Upload" width="100%">
+<img src="icons/showcase_2c.png" alt="OAA Upload" width="100%">
 
 *Upload media directly and auto-fill forms from your last request*
 
@@ -67,7 +67,7 @@ Enjoy a clean, minimalist interface with unnecessary features removed and a mini
 <td width="50%">
 
 ### Smart Tables with Search
-<img src="icons/showcase_3.png" alt="CR Wall Tables" width="100%">
+<img src="icons/showcase_2d.png" alt="CR Wall Tables" width="100%">
 
 *Collapsible tables with search functionality make the CR wall infinitely more manageable*
 
@@ -75,9 +75,9 @@ Enjoy a clean, minimalist interface with unnecessary features removed and a mini
 <td width="50%">
 
 ### Quick Toggle Popup
-<img src="icons/showcase_4.png" alt="Extension Popup" width="100%">
+<img src="icons/showcase_2a.png" alt="Extension Popup" width="100%">
 
-*Enable or disable features with a single click*
+*Cleaned up dashboard by removing unnecessary features*
 
 </td>
 </tr>

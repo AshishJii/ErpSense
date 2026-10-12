@@ -14,7 +14,7 @@ async function initialize() {
   navItem.className = 'navbar-item';
   navItem.id = 'erpsense-nav-toggle';
 
-  const logoUrl = browser.runtime.getURL('icons/icon16.png');
+  const logoUrl = browser.runtime.getURL('icons/icon128.png');
 
   navItem.innerHTML = `
     <label class="erpsense-switch-box">
