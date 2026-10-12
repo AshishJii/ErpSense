@@ -79,27 +79,25 @@ function createTimetableCard() {
     return card;
   }
 
-  
   const nativeLink = dashboard.querySelector('a[href*="MyTimeTable"]');
   const nativeCol = nativeLink?.closest('[class*="col-"]') || null;
 
-  
   const attendanceLink = dashboard.querySelector('a[href*="Attendance"]');
   const attendanceCol = attendanceLink?.closest('[class*="col-"]') || null;
 
   card = document.createElement('div');
   if (nativeCol) {
-    
+
     card.className = nativeCol.className;
   } else if (attendanceCol) {
-    
+
     card.className = 'col-12 col-lg mb-3';
     card.style.minWidth = '0';
   } else {
     card.className = 'col-12 mb-3';
   }
   card.dataset.erpsenseTimetableCard = 'true';
-  card.style.alignSelf = 'flex-start';   // keep natural height, don't stretch with the attendance tile
+  card.style.alignSelf = 'flex-start';
 
   card.innerHTML = `
     <div class="btn1 btn-white w-100 h-100 p-3" style="display:block;text-align:left">
@@ -115,10 +113,11 @@ function createTimetableCard() {
   `;
 
   if (nativeCol) {
-    nativeCol.replaceWith(card);       
-    attendanceCol.after(card);         
+    nativeCol.replaceWith(card);
+  } else if (attendanceCol) {
+    attendanceCol.after(card);
   } else {
-    dashboard.appendChild(card);        
+    dashboard.appendChild(card);
   }
 
   return card;
@@ -192,18 +191,16 @@ async function addTimeTableLink() {
       return;
     }
 
-    
     const sourceCells = [...todayRow.querySelectorAll('td')].slice(1);
     console.log('ErpSense: period cells found:', sourceCells.length);
 
     const periods = sourceCells.map((cell, index) => {
       const text = cell.textContent.replace(/\s+/g, ' ').trim();
-      
+
       const parts = [...text.matchAll(/\[\s*([^\]]*?)\s*\]/g)].map(m => m[1]);
       return { period: index + 1, parts, raw: text };
     });
 
-    
     while (periods.length && !periods[periods.length - 1].raw) {
       periods.pop();
     }
@@ -220,7 +217,6 @@ async function addTimeTableLink() {
       return;
     }
 
-    // Horizontal row of rectangles
     const row = document.createElement('div');
     row.style.cssText = `
       display: grid;
@@ -263,7 +259,7 @@ async function addTimeTableLink() {
 
         box.append(codeEl, teacherEl, roomEl);
       } else {
-        
+
         const other = document.createElement('div');
         other.textContent = raw || '—';
         box.appendChild(other);
@@ -284,7 +280,7 @@ async function addTimeTableLink() {
     );
   } finally {
     delete card.dataset.erpsenseTimetableLoading;
-    queueBalance();   
+    queueBalance();
   }
 }
 
@@ -308,7 +304,6 @@ function injectCompactStyles() {
   `;
   document.head.appendChild(style);
 }
-
 
 function compactLeftColumn() {
   const box = document.querySelector('.sectionDashboardProfile .new-message-box');
@@ -340,7 +335,6 @@ function compactLeftColumn() {
   };
 }
 
-
 let balanceQueued = false;
 function queueBalance() {
   if (balanceQueued) {
@@ -366,11 +360,9 @@ function balanceLeftColumn() {
     return;
   }
 
-  
   tile.style.minHeight = '';
   rightCol.style.marginTop = '';
 
-  
   if (window.innerWidth < 992) {
     return;
   }
@@ -383,13 +375,11 @@ function balanceLeftColumn() {
     return;
   }
 
-  
   const tlCard = document.querySelector('[data-erpsense-timetable-card]');
   const tileHeight = tile.getBoundingClientRect().height;
   const cardHeight = tlCard ? tlCard.getBoundingClientRect().height : tileHeight;
   tile.style.minHeight = `${Math.round(Math.max(tileHeight, cardHeight + gap))}px`;
 
-  
   const d =
     rightCol.getBoundingClientRect().bottom -
     leftCol.getBoundingClientRect().bottom;
@@ -398,16 +388,16 @@ function balanceLeftColumn() {
   }
 }
 
+const ATTENDANCE_TARGET = 75;
 
-const ATTENDANCE_TARGET = 75; 
 function attendanceColor(pct) {
   if (pct >= ATTENDANCE_TARGET) {
-    return '#16a34a';          
+    return '#16a34a';
   }
   if (pct >= ATTENDANCE_TARGET - 10) {
-    return '#f59e0b';          
+    return '#f59e0b';
   }
-  return '#dc2626';           
+  return '#dc2626';
 }
 
 function restyleAttendanceTile() {
@@ -423,7 +413,6 @@ function restyleAttendanceTile() {
     return;
   }
 
-  
   const text = col.textContent.replace(/\s+/g, ' ');
   const grab = re => text.match(re)?.[1];
 
@@ -434,7 +423,6 @@ function restyleAttendanceTile() {
   const withPf = grab(/With\s*PF\s*:\s*([\d.]+)/i);
   const withoutPf = grab(/Without\s*PF\s*:\s*([\d.]+)/i);
 
-  
   if (total == null || present == null || absent == null) {
     return;
   }
@@ -446,7 +434,6 @@ function restyleAttendanceTile() {
   wrap.style.cssText =
     'width:100%;text-align:left;flex:1 1 auto;display:flex;flex-direction:column';
 
-  
   const heading = document.createElement(tileIsLink ? 'div' : 'a');
   if (!tileIsLink) {
     heading.href = link.href;
@@ -456,7 +443,6 @@ function restyleAttendanceTile() {
     'display:block;font-size:16px;font-weight:600;margin-bottom:10px;color:#222;text-decoration:none';
   wrap.appendChild(heading);
 
-  
   const stats = document.createElement('div');
   stats.style.cssText =
     'display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));grid-auto-rows:1fr;gap:6px;margin-bottom:10px;flex:1 1 auto';
@@ -487,7 +473,6 @@ function restyleAttendanceTile() {
   });
   wrap.appendChild(stats);
 
-  
   const addPercent = (label, value) => {
     if (value == null) {
       return;
@@ -522,7 +507,6 @@ function restyleAttendanceTile() {
   addPercent('With PF', withPf);
   addPercent('Without PF', withoutPf);
 
-
   const t = parseInt(total, 10);
   const pr = parseInt(present, 10);
   if (t > 0 && ATTENDANCE_TARGET < 100) {
@@ -554,8 +538,44 @@ function restyleAttendanceTile() {
   col.dataset.erpsenseAttendance = 'done';
 }
 
+let timetableNoticeRemoved = false;
+let timetableNoticeChecks = 0;
+
+function removeTimetableDateNotice() {
+  if (timetableNoticeRemoved || timetableNoticeChecks++ > 40) {
+    return;
+  }
+
+  const re = /^\s*TimeTable Date is Successfully Changed\s*[×x✕]?\s*$/i;
+
+  let el = [...document.querySelectorAll('.alert, [role="alert"]')]
+    .find(a => re.test(a.textContent));
+
+  if (!el) {
+    el = [...document.querySelectorAll('div, section')]
+      .filter(d => d.textContent.length < 80 && re.test(d.textContent))
+      .pop();
+  }
+
+  if (!el) {
+    return;
+  }
+
+  while (
+    el.parentElement &&
+    el.parentElement !== document.body &&
+    re.test(el.parentElement.textContent)
+  ) {
+    el = el.parentElement;
+  }
+
+  el.remove();
+  timetableNoticeRemoved = true;
+}
+
 function handlePageMutations() {
   removeUnwantedElements();
+  removeTimetableDateNotice();
   injectCompactStyles();
   compactLeftColumn();
   restyleAttendanceTile();
@@ -564,16 +584,14 @@ function handlePageMutations() {
   queueBalance();
 }
 
-//------- initialize --------
 async function initialize() {
- 
+
   const result = await browser.storage.sync.get({ isExtensionEnabled: true });
   if (!result.isExtensionEnabled) {
     console.log('ErpSense is disabled.');
     return;
   }
 
-  
   if (!document.body) {
     requestAnimationFrame(initialize);
     return;
@@ -582,10 +600,8 @@ async function initialize() {
   window.addEventListener('resize', queueBalance);
   window.addEventListener('load', queueBalance);
 
- 
   handlePageMutations();
 
-  
   const observer = new MutationObserver(handlePageMutations);
   observer.observe(document.body, { childList: true, subtree: true });
 }
